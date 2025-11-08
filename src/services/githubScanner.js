@@ -90,12 +90,14 @@ class GitHubScanner {
     
     console.log('Step 3: Using AI to select relevant files for analysis...');
     const selectedFiles = await this.selectRelevantFiles(allFiles, repoInfo);
+    console.log(`AI selected ${selectedFiles.length} files out of ${allFiles.length} total`);
     
     console.log('Step 4: Fetching content of selected files...');
     const fileContents = await this.fetchSelectedFileContents(selectedFiles);
     
     console.log('Step 5: Using AI to analyze repository content and themes...');
     const analysis = await this.analyzeRepositoryWithAI(repoInfo, fileContents);
+    console.log('AI analysis completed, purpose:', analysis.purpose);
     
     return {
       repository: {
@@ -154,10 +156,15 @@ Return your selection ONLY as a JSON array (no markdown formatting, no code bloc
 `;
 
     try {
+      console.log('Sending request to DeepSeek for file selection...');
       const response = await this.deepseekService.generateJSONResponse(prompt, 'deepseek-coder');
+      console.log('DeepSeek response received:', response.substring(0, 200) + '...');
       const selectedPaths = this.parseJSONResponse(response);
+      console.log('Parsed selected paths:', selectedPaths);
       
-      return files.filter(file => selectedPaths.includes(file.path));
+      const filteredFiles = files.filter(file => selectedPaths.includes(file.path));
+      console.log(`Successfully filtered to ${filteredFiles.length} files`);
+      return filteredFiles;
     } catch (error) {
       console.warn('AI file selection failed, falling back to heuristic selection:', error.message);
       return this.fallbackFileSelection(files);

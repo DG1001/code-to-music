@@ -258,8 +258,11 @@
                 <div class="form-group">
                     <label for="musicStyle">Music Style:</label>
                     <select id="musicStyle">
+                        <option value="auto">🤖 Auto (AI decides based on repository)</option>
                         <option value="electronic">Electronic</option>
                         <option value="rock">Rock</option>
+                        <option value="hardrock">Hard Rock</option>
+                        <option value="heavy-metal">Heavy Metal</option>
                         <option value="pop">Pop</option>
                         <option value="jazz">Jazz</option>
                         <option value="classical">Classical</option>
@@ -326,6 +329,7 @@
                     <span>📊 ${results.fileStats?.total || results.analysis?.totalFiles || 'N/A'} files</span>
                     <span>🎯 ${results.fileStats?.selected || 'N/A'} AI-selected</span>
                     <span>🔍 ${results.fileStats?.analyzed || 'N/A'} analyzed</span>
+                    <span>🎵 ${results.selectedStyle || 'N/A'}</span>
                     <span>🏷️ ${results.repository.topics?.length > 0 ? results.repository.topics.join(', ') : 'No topics'}</span>
                 </div>
                 ${results.purpose ? `

@@ -53,16 +53,81 @@ class DeepSeekService {
     }
   }
 
-  async generateMusicPrompt(repoAnalysis) {
-    const prompt = this.buildMusicPrompt(repoAnalysis);
+  async generateMusicPrompt(repoAnalysis, musicStyle = 'electronic') {
+    const prompt = this.buildMusicPrompt(repoAnalysis, musicStyle);
     const response = await this.generateResponseWithLimit(prompt, 3000);
     return this.truncateToCharLimit(response, 2000);
   }
 
   async generateLyrics(repoAnalysis, musicStyle = 'electronic') {
-    const prompt = this.buildLyricsPrompt(repoAnalysis, musicStyle);
+    let actualStyle = musicStyle;
+    
+    // If auto mode, let AI decide the best style based on repository
+    if (musicStyle === 'auto') {
+      actualStyle = await this.determineBestMusicStyle(repoAnalysis);
+    }
+    
+    const prompt = this.buildLyricsPrompt(repoAnalysis, actualStyle);
     const response = await this.generateResponseWithLimit(prompt, 4000);
     return this.truncateToCharLimit(response, 3000);
+  }
+
+  async determineBestMusicStyle(repoAnalysis) {
+    const { repository, purpose, themes, emotions, technicalConcepts, complexity, innovationLevel } = repoAnalysis;
+    
+    const prompt = `
+Based on the following GitHub repository analysis, determine the most suitable music style for generating lyrics:
+
+Repository Information:
+- Name: ${repository.name}
+- Description: ${repository.description || 'No description'}
+- Language: ${repository.language || 'Unknown'}
+- Topics: ${repository.topics?.join(', ') || 'No topics'}
+
+Analysis:
+- Purpose: ${purpose}
+- Themes: ${themes.join(', ')}
+- Emotions: ${emotions.join(', ')}
+- Technical Concepts: ${technicalConcepts.join(', ')}
+- Complexity: ${complexity}
+- Innovation Level: ${innovationLevel}
+
+Available styles: electronic, rock, hardrock, heavy-metal, pop, jazz, classical, hip-hop, ambient
+
+Choose the single best style that matches the repository's character and purpose. Consider:
+- High complexity/innovation → electronic, experimental styles
+- Technical/analytical → electronic, classical
+- Emotional/human-focused → pop, rock, jazz
+- Heavy/complex systems → heavy-metal, hardrock
+- Simple/elegant → classical, ambient
+- Modern/trendy → hip-hop, electronic
+
+Respond with ONLY the style name (no explanation): electronic, rock, hardrock, heavy-metal, pop, jazz, classical, hip-hop, or ambient
+    `;
+
+    try {
+      const response = await this.generateResponseWithLimit(prompt, 500);
+      const cleanResponse = response.trim().toLowerCase();
+      
+      // Validate the response is one of the allowed styles
+      const validStyles = ['electronic', 'rock', 'hardrock', 'heavy-metal', 'pop', 'jazz', 'classical', 'hip-hop', 'ambient'];
+      if (validStyles.includes(cleanResponse)) {
+        return cleanResponse;
+      }
+      
+      // Try to extract style from response if it contains extra text
+      for (const style of validStyles) {
+        if (cleanResponse.includes(style)) {
+          return style;
+        }
+      }
+      
+      console.warn(`Invalid style response: ${cleanResponse}, using default`);
+      return 'electronic';
+    } catch (error) {
+      console.warn('Failed to determine music style, using default:', error.message);
+      return 'electronic';
+    }
   }
 
   truncateToCharLimit(text, maxChars) {
@@ -127,7 +192,7 @@ class DeepSeekService {
     }
   }
 
-  buildMusicPrompt(repoAnalysis) {
+  buildMusicPrompt(repoAnalysis, musicStyle = 'electronic') {
     const { repository, fileStats, purpose, themes, emotions, technicalConcepts, musicalMetaphors, keyFeatures, innovationLevel, complexity, userImpact, artisticInterpretation } = repoAnalysis;
     
     return `
@@ -157,14 +222,16 @@ File Analysis:
 - AI-Selected Files: ${fileStats.selected}
 - Files Analyzed: ${fileStats.analyzed}
 
-Generate a comprehensive music prompt that includes:
-1. **Genre and Style**: Based on the repository's purpose and complexity
+Generate a comprehensive music prompt in **${musicStyle.toUpperCase()}** style that includes:
+1. **Genre and Style**: Must be ${musicStyle.toUpperCase()}, based on the repository's characteristics
 2. **Mood and Atmosphere**: Reflect the emotional tone and user impact
 3. **Tempo and Rhythm**: Inspired by technical concepts and innovation level
-4. **Instrumentation**: Match the complexity and themes
+4. **Instrumentation**: Match the complexity and themes with ${musicStyle} instruments
 5. **Key and Scale**: Complement the emotional tone
 6. **Special Effects**: Represent unique features and innovation
 7. **Musical Elements**: Directly incorporate the musical metaphors identified
+
+CRITICAL: You MUST generate content specifically in ${musicStyle.toUpperCase()} style. Do not suggest other genres or styles. The user explicitly chose ${musicStyle.toUpperCase()} and expects that style.
 
 IMPORTANT: Do NOT include timing instructions, section durations, timestamps, or any temporal references (like "0:00-0:45", intro/outro lengths, etc.). The music AI will handle timing automatically. Focus only on musical characteristics, mood, instruments, and creative elements.
 

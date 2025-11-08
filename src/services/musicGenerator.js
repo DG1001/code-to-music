@@ -13,11 +13,17 @@ class MusicGenerator {
       
       const repoAnalysis = await this.githubScanner.analyzeRepository(repoUrl);
       
-      console.log('Generating music prompt...');
-      const musicPrompt = await this.deepseekService.generateMusicPrompt(repoAnalysis);
+      // Determine the actual style used (important for auto mode)
+      let actualStyle = musicStyle;
+      if (musicStyle === 'auto') {
+        actualStyle = await this.deepseekService.determineBestMusicStyle(repoAnalysis);
+      }
       
-      console.log('Generating lyrics...');
-      const lyrics = await this.deepseekService.generateLyrics(repoAnalysis, musicStyle);
+      console.log('Generating music prompt...');
+      const musicPrompt = await this.deepseekService.generateMusicPrompt(repoAnalysis, actualStyle);
+      
+      console.log(`Generating lyrics in ${actualStyle} style...`);
+      const lyrics = await this.deepseekService.generateLyrics(repoAnalysis, actualStyle);
       
       return {
         repository: {
@@ -40,6 +46,8 @@ class MusicGenerator {
         userImpact: repoAnalysis.userImpact || '',
         artisticInterpretation: repoAnalysis.artisticInterpretation || '',
         selectedFiles: repoAnalysis.selectedFiles || [],
+        selectedStyle: actualStyle,
+        requestedStyle: musicStyle,
         musicPrompt,
         lyrics,
         generatedAt: new Date().toISOString()
@@ -50,10 +58,10 @@ class MusicGenerator {
     }
   }
 
-  async generateMultipleStyles(repoUrl, styles = ['electronic', 'rock', 'pop', 'jazz']) {
+  async generateMultipleStyles(repoUrl, styles = ['auto', 'electronic', 'rock', 'pop']) {
     try {
       const repoAnalysis = await this.githubScanner.analyzeRepository(repoUrl);
-      const musicPrompt = await this.deepseekService.generateMusicPrompt(repoAnalysis);
+      const musicPrompt = await this.deepseekService.generateMusicPrompt(repoAnalysis, 'auto');
       
       const lyricsResults = await Promise.allSettled(
         styles.map(style => 
@@ -91,6 +99,7 @@ class MusicGenerator {
         userImpact: repoAnalysis.userImpact || '',
         artisticInterpretation: repoAnalysis.artisticInterpretation || '',
         selectedFiles: repoAnalysis.selectedFiles || [],
+        requestedStyles: styles,
         musicPrompt,
         lyrics: successfulLyrics,
         errors: failedLyrics,
