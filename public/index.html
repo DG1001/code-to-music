@@ -105,6 +105,31 @@
             transform: none;
         }
 
+        .copy-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 10px;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .copy-btn.copied {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
+
         .loading {
             text-align: center;
             padding: 40px;
@@ -354,7 +379,10 @@
                 tabContents.innerHTML += `
                     <div id="prompt" class="tab-content active">
                         <div class="result-section">
-                            <h3>Music Generation Prompt (${results.musicPrompt.length}/2000 chars)</h3>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h3>Music Generation Prompt (${results.musicPrompt.length}/2000 chars)</h3>
+                                <button class="copy-btn" onclick="copyToClipboard('${results.musicPrompt.replace(/'/g, "\\'").replace(/"/g, '\\"')}', 'prompt')">📋 Copy Prompt</button>
+                            </div>
                             <pre>${results.musicPrompt}</pre>
                         </div>
                     </div>
@@ -368,7 +396,10 @@
                         tabContents.innerHTML += `
                             <div id="lyrics-${index}" class="tab-content">
                                 <div class="result-section">
-                                    <h3>Lyrics - ${item.style} Style (${item.lyrics.length}/3000 chars)</h3>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <h3>Lyrics - ${item.style} Style (${item.lyrics.length}/3000 chars)</h3>
+                                        <button class="copy-btn" onclick="copyToClipboard('${item.lyrics.replace(/'/g, "\\'").replace(/"/g, '\\"')}', 'lyrics-${index}')">📋 Copy Lyrics</button>
+                                    </div>
                                     <pre>${item.lyrics}</pre>
                                 </div>
                             </div>
@@ -379,7 +410,10 @@
                     tabContents.innerHTML += `
                             <div id="lyrics" class="tab-content">
                                 <div class="result-section">
-                                    <h3>Generated Lyrics (${results.lyrics.length}/3000 chars)</h3>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <h3>Generated Lyrics (${results.lyrics.length}/3000 chars)</h3>
+                                        <button class="copy-btn" onclick="copyToClipboard('${results.lyrics.replace(/'/g, "\\'").replace(/"/g, '\\"')}', 'lyrics')">📋 Copy Lyrics</button>
+                                    </div>
                                     <pre>${results.lyrics}</pre>
                                 </div>
                             </div>
@@ -464,10 +498,58 @@
 
         // Allow Enter key to trigger generation
         document.getElementById('repoUrl').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                generateMusic();
+        if (e.key === 'Enter') {
+            generateMusic();
+        }
+    }
+
+    async function copyToClipboard(text, id) {
+        try {
+            await navigator.clipboard.writeText(text);
+            
+            // Show success feedback
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '✅ Copied!';
+            button.classList.add('copied');
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove('copied');
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+            
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                const button = document.querySelector(`[onclick*="${id}"]`);
+                if (button) {
+                    const originalText = button.textContent;
+                    button.textContent = '✅ Copied!';
+                    button.classList.add('copied');
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.classList.remove('copied');
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
             }
-        });
+            
+            document.body.removeChild(textArea);
+        }
+    }
     </script>
 </body>
 </html>
