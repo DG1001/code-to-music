@@ -522,7 +522,7 @@
                         <div class="result-section">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <h3>Music Generation Prompt (${results.musicPrompt.length}/2000 chars)</h3>
-                                <button class="copy-btn" onclick="copyToClipboard('${results.musicPrompt.replace(/'/g, "\\'").replace(/"/g, '\\"')}', 'prompt')">📋 Copy Prompt</button>
+                                <button class="copy-btn" onclick="copyToClipboard('${results.musicPrompt.replace(/'/g, "\\'").replace(/"/g, '\\"')}', this)">📋 Copy Prompt</button>
                             </div>
                             <pre>${results.musicPrompt}</pre>
                         </div>
@@ -539,7 +539,7 @@
                                 <div class="result-section">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                         <h3>Lyrics - ${item.style} Style (${item.lyrics.length}/3000 chars)</h3>
-                                        <button class="copy-btn" onclick="copyToClipboard('${item.lyrics.replace(/'/g, "\\'").replace(/"/g, '\\"')}', 'lyrics-${index}')">📋 Copy Lyrics</button>
+                                        <button class="copy-btn" onclick="copyToClipboard('${item.lyrics.replace(/'/g, "\\'").replace(/"/g, '\\"')}', this)">📋 Copy Lyrics</button>
                                     </div>
                                     <pre>${item.lyrics}</pre>
                                 </div>
@@ -553,7 +553,7 @@
                                 <div class="result-section">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                         <h3>Generated Lyrics (${results.lyrics.length}/3000 chars)</h3>
-                                        <button class="copy-btn" onclick="copyToClipboard('${results.lyrics.replace(/'/g, "\\'").replace(/"/g, '\\"')}', 'lyrics')">📋 Copy Lyrics</button>
+                                        <button class="copy-btn" onclick="copyToClipboard('${results.lyrics.replace(/'/g, "\\'").replace(/"/g, '\\"')}', this)">📋 Copy Lyrics</button>
                                     </div>
                                     <pre>${results.lyrics}</pre>
                                 </div>
@@ -615,53 +615,50 @@
             }
         });
 
-        async function copyToClipboard(text, id) {
-        try {
-            await navigator.clipboard.writeText(text);
-            
-            // Show success feedback
-            const button = event.target;
-            const originalText = button.textContent;
-            button.textContent = '✅ Copied!';
-            button.classList.add('copied');
-            
-            setTimeout(() => {
-                button.textContent = originalText;
-                button.classList.remove('copied');
-            }, 2000);
-        } catch (err) {
-            console.error('Failed to copy text: ', err);
-            
-            // Fallback for older browsers
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.left = '-999999px';
-            textArea.style.top = '-999999px';
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            
+        async function copyToClipboard(text, button) {
             try {
-                document.execCommand('copy');
-                const button = document.querySelector(`[onclick*="${id}"]`);
-                if (button) {
-                    const originalText = button.textContent;
-                    button.textContent = '✅ Copied!';
-                    button.classList.add('copied');
+                // Clean up the text - remove escape sequences
+                const cleanText = text.replace(/\\'/g, "'").replace(/\\"/g, '"');
+                
+                // Try modern clipboard API first
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(cleanText);
+                } else {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = cleanText;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    textArea.style.top = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
                     
-                    setTimeout(() => {
-                        button.textContent = originalText;
-                        button.classList.remove('copied');
-                    }, 2000);
+                    try {
+                        document.execCommand('copy');
+                    } catch (fallbackErr) {
+                        console.error('Fallback copy failed:', fallbackErr);
+                        throw fallbackErr;
+                    } finally {
+                        document.body.removeChild(textArea);
+                    }
                 }
+                
+                // Show success feedback
+                const originalText = button.textContent;
+                button.textContent = '✅ Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+                
             } catch (err) {
-                console.error('Fallback copy failed:', err);
+                console.error('Failed to copy text: ', err);
+                alert('Failed to copy to clipboard. Please select and copy the text manually.');
             }
-            
-            document.body.removeChild(textArea);
         }
-    }
     </script>
 </body>
 </html>
