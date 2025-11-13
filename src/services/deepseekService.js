@@ -56,7 +56,7 @@ class DeepSeekService {
   async generateMusicPrompt(repoAnalysis, musicStyle = 'electronic') {
     const prompt = this.buildMusicPrompt(repoAnalysis, musicStyle);
     const response = await this.generateResponseWithLimit(prompt, 3000);
-    return this.truncateToCharLimit(response, 2000);
+    return this.truncateToCharLimit(response, 1000);
   }
 
   async generateLyrics(repoAnalysis, musicStyle = 'electronic') {
@@ -239,7 +239,7 @@ The prompt should deeply connect the technical essence with musical expression. 
 
 Format the response as a structured, detailed prompt ready for AI music generation tools.
 
-IMPORTANT: Keep your response under 2000 characters total to ensure compatibility with music generation AI tools.
+IMPORTANT: Keep your response under 1000 characters total to ensure compatibility with music generation AI tools.
     `;
   }
 
