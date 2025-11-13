@@ -73,36 +73,44 @@ class DeepSeekService {
   }
 
   async determineBestMusicStyle(repoAnalysis) {
-    const { repository, purpose, themes, emotions, technicalConcepts, complexity, innovationLevel } = repoAnalysis;
+    const { repository, purpose, themes, emotions, technicalConcepts, complexity, innovationLevel, artisticInterpretation } = repoAnalysis;
     
     const prompt = `
-Based on the following GitHub repository analysis, determine the most suitable music style for generating lyrics:
+You are a music expert analyzing a GitHub repository to determine the perfect musical style that captures its essence.
 
-Repository Information:
-- Name: ${repository.name}
-- Description: ${repository.description || 'No description'}
-- Language: ${repository.language || 'Unknown'}
+REPOSITORY ANALYSIS:
+- Name: "${repository.name}"
+- Description: "${repository.description || 'No description'}"
+- Language: "${repository.language || 'Unknown'}"
 - Topics: ${repository.topics?.join(', ') || 'No topics'}
-
-Analysis:
-- Purpose: ${purpose}
-- Themes: ${themes.join(', ')}
-- Emotions: ${emotions.join(', ')}
+- Purpose: "${purpose}"
+- Core Themes: ${themes.join(', ')}
+- Emotional Tone: ${emotions.join(', ')}
 - Technical Concepts: ${technicalConcepts.join(', ')}
 - Complexity: ${complexity}
 - Innovation Level: ${innovationLevel}
+- Artistic Essence: "${artisticInterpretation}"
 
-Available styles: electronic, rock, hardrock, heavy-metal, pop, jazz, classical, hip-hop, ambient
+MUSIC STYLE MATCHING GUIDE:
+Analyze the repository's characteristics and match them to these styles:
 
-Choose the single best style that matches the repository's character and purpose. Consider:
-- High complexity/innovation → electronic, experimental styles
-- Technical/analytical → electronic, classical
-- Emotional/human-focused → pop, rock, jazz
-- Heavy/complex systems → heavy-metal, hardrock
-- Simple/elegant → classical, ambient
-- Modern/trendy → hip-hop, electronic
+ELECTRONIC: For modern, innovative, technical projects. Perfect for AI, data science, cutting-edge tech. Use for complex algorithms, futuristic concepts, digital systems.
+ROCK: For projects with energy, impact, and strong foundations. Great for infrastructure, frameworks, tools that empower others.
+HARDROCK: For intense, powerful systems. Database engines, compilers, performance-critical applications.
+HEAVY-METAL: For complex, aggressive, highly technical systems. Operating systems, game engines, cryptography.
+POP: For user-friendly, accessible projects. UI libraries, educational tools, applications with mass appeal.
+JAZZ: For creative, improvisational, elegant solutions. Creative coding, generative art, experimental projects.
+CLASSICAL: For timeless, structured, elegant architectures. Foundational libraries, mathematical systems, well-engineered solutions.
+HIP-HOP: For modern, rhythmic, community-driven projects. Social apps, collaboration tools, trend-setting technologies.
+AMBIENT: For background services, subtle tools, atmospheric projects. APIs, microservices, utilities that work behind the scenes.
 
-Respond with ONLY the style name (no explanation): electronic, rock, hardrock, heavy-metal, pop, jazz, classical, hip-hop, or ambient
+Consider these factors:
+- Emotional tone and user experience
+- Technical complexity and innovation level
+- Project purpose and target audience
+- The "soul" of the codebase
+
+Choose ONE style that best represents the repository's character. Respond with ONLY the style name: electronic, rock, hardrock, heavy-metal, pop, jazz, classical, hip-hop, or ambient
     `;
 
     try {
@@ -196,50 +204,41 @@ Respond with ONLY the style name (no explanation): electronic, rock, hardrock, h
     const { repository, fileStats, purpose, themes, emotions, technicalConcepts, musicalMetaphors, keyFeatures, innovationLevel, complexity, userImpact, artisticInterpretation } = repoAnalysis;
     
     return `
-Based on the following enhanced GitHub repository analysis, generate a detailed music prompt for AI music generation:
+Create an evocative music generation prompt that translates this code repository into ${musicStyle.toUpperCase()} music.
 
-Repository Information:
-- Name: ${repository.name}
-- Description: ${repository.description || 'No description'}
-- Primary Language: ${repository.language || 'Unknown'}
-- Stars: ${repository.stars}, Forks: ${repository.forks}
-- Topics: ${repository.topics.join(', ') || 'No topics'}
+REPOSITORY ESSENCE:
+"${repository.name}" - ${purpose}
+${repository.description ? `Description: "${repository.description}"` : ''}
+Language: ${repository.language || 'Unknown'} | Topics: ${repository.topics.join(', ') || 'None'}
 
-AI-Enhanced Analysis:
-- Purpose: ${purpose}
+ARTISTIC INTERPRETATION:
+${artisticInterpretation}
+
+KEY CHARACTERISTICS:
+- Emotional Landscape: ${emotions.join(', ')}
 - Core Themes: ${themes.join(', ')}
-- Emotional Tone: ${emotions.join(', ')}
-- Technical Concepts: ${technicalConcepts.join(', ')}
-- Musical Metaphors: ${musicalMetaphors.join(', ')}
-- Key Features: ${keyFeatures.join(', ')}
+- Technical Soul: ${technicalConcepts.join(', ')}
+- Musical Inspiration: ${musicalMetaphors.join(', ')}
 - Innovation Level: ${innovationLevel}
 - Complexity: ${complexity}
-- User Impact: ${userImpact}
-- Artistic Interpretation: ${artisticInterpretation}
 
-File Analysis:
-- Total Files Scanned: ${fileStats.total}
-- AI-Selected Files: ${fileStats.selected}
-- Files Analyzed: ${fileStats.analyzed}
+STYLE-SPECIFIC ${musicStyle.toUpperCase()} DIRECTIONS:
+${this.getStyleSpecificDirections(musicStyle)}
 
-Generate a comprehensive music prompt in **${musicStyle.toUpperCase()}** style that includes:
-1. **Genre and Style**: Must be ${musicStyle.toUpperCase()}, based on the repository's characteristics
-2. **Mood and Atmosphere**: Reflect the emotional tone and user impact
-3. **Tempo and Rhythm**: Inspired by technical concepts and innovation level
-4. **Instrumentation**: Match the complexity and themes with ${musicStyle} instruments
-5. **Key and Scale**: Complement the emotional tone
-6. **Special Effects**: Represent unique features and innovation
-7. **Musical Elements**: Directly incorporate the musical metaphors identified
+MUSICAL ELEMENTS TO CREATE:
+• MELODY: Create melodic themes that reflect the repository's purpose and emotional tone
+• HARMONY: Build chord progressions that support the ${musicStyle} style and technical concepts
+• RHYTHM: Design rhythmic patterns inspired by ${technicalConcepts.join(', ')}
+• TEXTURE: Layer sounds that represent the ${complexity} architecture
+• DYNAMICS: Shape volume and intensity to mirror ${userImpact}
 
-CRITICAL: You MUST generate content specifically in ${musicStyle.toUpperCase()} style. Do not suggest other genres or styles. The user explicitly chose ${musicStyle.toUpperCase()} and expects that style.
+INSTRUMENTATION: Use authentic ${musicStyle} instruments and sounds that capture the project's essence.
 
-IMPORTANT: Do NOT include timing instructions, section durations, timestamps, or any temporal references (like "0:00-0:45", intro/outro lengths, etc.). The music AI will handle timing automatically. Focus only on musical characteristics, mood, instruments, and creative elements.
+MOOD: Create an atmosphere that embodies: ${emotions.join(', ')} through ${musicStyle} expression.
 
-The prompt should deeply connect the technical essence with musical expression. Use the AI analysis to create a prompt that truly captures the soul of this codebase in musical form.
+CRITICAL: Stay strictly within ${musicStyle} conventions. No timing/structure notes. Focus on sonic qualities, emotional impact, and technical-to-musical translation.
 
-Format the response as a structured, detailed prompt ready for AI music generation tools.
-
-IMPORTANT: Keep your response under 1000 characters total to ensure compatibility with music generation AI tools.
+Keep under 1000 characters. Create a prompt that would inspire a musician to compose the perfect soundtrack for this codebase.
     `;
   }
 
@@ -284,6 +283,22 @@ Format the response with clear [Verse], [Chorus], [Bridge], [Outro] labels for s
 
 IMPORTANT: Keep your response under 3000 characters total to ensure compatibility with music generation AI tools.
     `;
+  }
+
+  getStyleSpecificDirections(musicStyle) {
+    const directions = {
+      electronic: "Use synthesizers, drum machines, and digital effects. Create futuristic, precise sounds with clean rhythms. Incorporate glitch effects for complexity, pads for atmosphere, and arpeggios for technical patterns.",
+      rock: "Use electric guitars, bass, drums, and passionate vocals. Build energy with driving rhythms and powerful chord progressions. Include guitar solos for technical brilliance and breakdowns for complex sections.",
+      hardrock: "Amplify with distorted guitars, heavy drums, and intense energy. Create powerful riffs that represent strong foundations and screaming solos for innovation.",
+      'heavy-metal': "Use extreme distortion, double-bass drums, and aggressive tones. Create complex time signatures for intricate systems and powerful vocals for impact.",
+      pop: "Focus on catchy melodies, clear structure, and accessibility. Use modern production, memorable hooks, and relatable emotional expression.",
+      jazz: "Incorporate improvisation, complex harmonies, and sophisticated rhythms. Use brass, piano, and upright bass for elegance and creativity.",
+      classical: "Use orchestral instruments, structured compositions, and emotional depth. Create themes that develop like algorithms and harmonies that build like architectures.",
+      'hip-hop': "Use strong beats, samples, and rhythmic flow. Incorporate modern production techniques and urban sounds that reflect community and innovation.",
+      ambient: "Create atmospheric pads, subtle textures, and evolving soundscapes. Use minimal percussion and focus on mood and space over traditional structure."
+    };
+    
+    return directions[musicStyle] || "Create music that captures the essence of the repository through appropriate instrumentation and style.";
   }
 
   extractCodeThemes(codeContent) {
