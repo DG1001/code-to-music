@@ -201,44 +201,37 @@ Choose ONE style that best represents the repository's character. Respond with O
   }
 
   buildMusicPrompt(repoAnalysis, musicStyle = 'electronic') {
-    const { repository, fileStats, purpose, themes, emotions, technicalConcepts, musicalMetaphors, keyFeatures, innovationLevel, complexity, userImpact, artisticInterpretation } = repoAnalysis;
+    const { repository, purpose, themes, emotions, technicalConcepts, musicalMetaphors, keyFeatures, innovationLevel, complexity, userImpact, artisticInterpretation } = repoAnalysis;
     
     return `
-Create an evocative music generation prompt that translates this code repository into ${musicStyle.toUpperCase()} music.
+Generate a detailed music prompt for AI music generation in ${musicStyle.toUpperCase()} style:
 
-REPOSITORY ESSENCE:
-"${repository.name}" - ${purpose}
+Repository: "${repository.name}" - ${purpose}
 ${repository.description ? `Description: "${repository.description}"` : ''}
 Language: ${repository.language || 'Unknown'} | Topics: ${repository.topics.join(', ') || 'None'}
 
-ARTISTIC INTERPRETATION:
-${artisticInterpretation}
-
-KEY CHARACTERISTICS:
-- Emotional Landscape: ${emotions.join(', ')}
-- Core Themes: ${themes.join(', ')}
-- Technical Soul: ${technicalConcepts.join(', ')}
-- Musical Inspiration: ${musicalMetaphors.join(', ')}
-- Innovation Level: ${innovationLevel}
+Analysis:
+- Purpose: ${purpose}
+- Themes: ${themes.join(', ')}
+- Emotions: ${emotions.join(', ')}
+- Technical Concepts: ${technicalConcepts.join(', ')}
+- Musical Metaphors: ${musicalMetaphors.join(', ')}
+- Key Features: ${keyFeatures.join(', ')}
+- Innovation: ${innovationLevel}
 - Complexity: ${complexity}
+- Artistic Essence: ${artisticInterpretation}
 
-STYLE-SPECIFIC ${musicStyle.toUpperCase()} DIRECTIONS:
-${this.getStyleSpecificDirections(musicStyle)}
+Create a ${musicStyle} music prompt that includes:
+1. Genre and Style: Pure ${musicStyle} - ${this.getStyleDescription(musicStyle)}
+2. Mood and Atmosphere: Capture ${emotions.join(', ')} emotions
+3. Tempo and Rhythm: Reflect ${technicalConcepts.slice(0, 3).join(', ')}
+4. Instrumentation: ${this.getStyleInstruments(musicStyle)}
+5. Musical Character: ${complexity} complexity with ${innovationLevel} innovation
+6. Creative Elements: Incorporate ${musicalMetaphors.slice(0, 2).join(' and ')}
 
-MUSICAL ELEMENTS TO CREATE:
-• MELODY: Create melodic themes that reflect the repository's purpose and emotional tone
-• HARMONY: Build chord progressions that support the ${musicStyle} style and technical concepts
-• RHYTHM: Design rhythmic patterns inspired by ${technicalConcepts.join(', ')}
-• TEXTURE: Layer sounds that represent the ${complexity} architecture
-• DYNAMICS: Shape volume and intensity to mirror ${userImpact}
+Focus on creating a cohesive musical piece that translates the technical essence into ${musicStyle} expression. The prompt should be ready for AI music generation tools.
 
-INSTRUMENTATION: Use authentic ${musicStyle} instruments and sounds that capture the project's essence.
-
-MOOD: Create an atmosphere that embodies: ${emotions.join(', ')} through ${musicStyle} expression.
-
-CRITICAL: Stay strictly within ${musicStyle} conventions. No timing/structure notes. Focus on sonic qualities, emotional impact, and technical-to-musical translation.
-
-Keep under 1000 characters. Create a prompt that would inspire a musician to compose the perfect soundtrack for this codebase.
+IMPORTANT: Keep under 1000 characters. No timing instructions or section durations.
     `;
   }
 
@@ -283,6 +276,36 @@ Format the response with clear [Verse], [Chorus], [Bridge], [Outro] labels for s
 
 IMPORTANT: Keep your response under 3000 characters total to ensure compatibility with music generation AI tools.
     `;
+  }
+
+  getStyleDescription(musicStyle) {
+    const descriptions = {
+      electronic: "modern, innovative, technical with synthesizers and digital effects",
+      rock: "energetic, powerful with electric guitars and driving rhythms",
+      hardrock: "intense, amplified with distorted guitars and heavy drums",
+      'heavy-metal': "aggressive, complex with extreme distortion and powerful vocals",
+      pop: "catchy, accessible with clear structure and memorable hooks",
+      jazz: "improvisational, sophisticated with complex harmonies and brass/piano",
+      classical: "structured, elegant with orchestral instruments and emotional depth",
+      'hip-hop': "rhythmic, modern with strong beats and urban sounds",
+      ambient: "atmospheric, evolving with subtle textures and minimal percussion"
+    };
+    return descriptions[musicStyle] || "creative and expressive";
+  }
+
+  getStyleInstruments(musicStyle) {
+    const instruments = {
+      electronic: "synthesizers, drum machines, digital effects",
+      rock: "electric guitars, bass, drums, passionate vocals",
+      hardrock: "distorted guitars, heavy drums, intense vocals",
+      'heavy-metal': "extreme distortion guitars, double-bass drums, powerful vocals",
+      pop: "modern production, catchy melodies, clear vocals",
+      jazz: "brass, piano, upright bass, sophisticated rhythms",
+      classical: "orchestral strings, woodwinds, piano, structured arrangements",
+      'hip-hop': "strong beats, samples, rhythmic vocals",
+      ambient: "atmospheric pads, subtle textures, evolving soundscapes"
+    };
+    return instruments[musicStyle] || "appropriate instrumentation";
   }
 
   getStyleSpecificDirections(musicStyle) {
