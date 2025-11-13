@@ -522,7 +522,7 @@
                         <div class="result-section">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <h3>Music Generation Prompt (${results.musicPrompt.length}/2000 chars)</h3>
-                                <button class="copy-btn" onclick="copyToClipboard('${results.musicPrompt.replace(/'/g, "\\'").replace(/"/g, '\\"')}', this)">📋 Copy Prompt</button>
+                                <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy Prompt</button>
                             </div>
                             <pre>${results.musicPrompt}</pre>
                         </div>
@@ -539,7 +539,7 @@
                                 <div class="result-section">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                         <h3>Lyrics - ${item.style} Style (${item.lyrics.length}/3000 chars)</h3>
-                                        <button class="copy-btn" onclick="copyToClipboard('${item.lyrics.replace(/'/g, "\\'").replace(/"/g, '\\"')}', this)">📋 Copy Lyrics</button>
+                                        <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy Lyrics</button>
                                     </div>
                                     <pre>${item.lyrics}</pre>
                                 </div>
@@ -553,7 +553,7 @@
                                 <div class="result-section">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                         <h3>Generated Lyrics (${results.lyrics.length}/3000 chars)</h3>
-                                        <button class="copy-btn" onclick="copyToClipboard('${results.lyrics.replace(/'/g, "\\'").replace(/"/g, '\\"')}', this)">📋 Copy Lyrics</button>
+                                        <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy Lyrics</button>
                                     </div>
                                     <pre>${results.lyrics}</pre>
                                 </div>
@@ -615,18 +615,19 @@
             }
         });
 
-        async function copyToClipboard(text, button) {
+        async function copyToClipboard(button) {
             try {
-                // Clean up the text - remove escape sequences
-                const cleanText = text.replace(/\\'/g, "'").replace(/\\"/g, '"');
+                // Find the pre element containing the text to copy
+                const preElement = button.closest('.result-section').querySelector('pre');
+                const textToCopy = preElement ? preElement.textContent : '';
                 
                 // Try modern clipboard API first
                 if (navigator.clipboard && window.isSecureContext) {
-                    await navigator.clipboard.writeText(cleanText);
+                    await navigator.clipboard.writeText(textToCopy);
                 } else {
                     // Fallback for older browsers
                     const textArea = document.createElement('textarea');
-                    textArea.value = cleanText;
+                    textArea.value = textToCopy;
                     textArea.style.position = 'fixed';
                     textArea.style.left = '-999999px';
                     textArea.style.top = '-999999px';
