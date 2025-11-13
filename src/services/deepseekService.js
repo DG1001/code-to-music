@@ -10,11 +10,11 @@ class DeepSeekService {
     }
   }
 
-  async generateJSONResponse(prompt, model = 'deepseek-coder') {
+  async generateJSONResponse(prompt, model = 'deepseek-chat') {
     return await this.generateResponse(prompt, model, true);
   }
 
-  async generateResponse(prompt, model = 'deepseek-coder', requireJSON = false) {
+  async generateResponse(prompt, model = 'deepseek-chat', requireJSON = false) {
     try {
       const systemMessage = requireJSON 
         ? 'You are an AI assistant that analyzes GitHub repositories. Always respond with pure JSON only - no markdown formatting, no code blocks, no explanations, just the JSON response.'
@@ -160,7 +160,7 @@ Respond with ONLY the style name (no explanation): electronic, rock, hardrock, h
   async generateResponseWithLimit(prompt, maxTokens) {
     try {
       const response = await axios.post(`${this.baseURL}/chat/completions`, {
-        model: 'deepseek-coder',
+        model: 'deepseek-chat',
         messages: [
           {
             role: 'system',
